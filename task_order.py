@@ -1,28 +1,34 @@
-import sys, io
-def test(s): sys.stdin=io.StringIO(s); main()
+def dfs(adjacency_list, tasks):
+    colors = [0] * (tasks+1)
+    res = []
 
-def dfs(start, adjacency_list, vertices):
-    stack = [(start, adjacency_list)]
-    colors = [0] * len(vertices)+1
+    for i in range(tasks):
+        if colors[i+1] != 2:
+            stack = [(i+1, adjacency_list[i+1])]
     
-    while stack:
-        v, neighbors = stack.pop()
-        if len(neighbors) == 0:
-            colors[v] = 2
-        else:
-            u = neighbors.pop()
-            if colors[u] == 0:
-                colors[u] = 1
-                stack.push(u, adjacency_list[u])
-            elif colors[u] == 1:
-                return []
+            while stack:
+                v, neighbors = stack.pop()
+                colors[v] = 1
+                if len(neighbors) == 0:
+                    colors[v] = 2
+                else:
+                    u = neighbors.pop()
+                    if colors[u] == 0:
+                        colors[u] = 1
+                        stack.append((v, neighbors))
+                        stack.append((u, adjacency_list[u]))
+                    elif colors[u] == 1:
+                        return []
+                    else:
+                        stack.append((v, neighbors))
+                if colors[v] == 2:
+                    res.append(v)
+    return res[::-1]
 
-
-
-def adjacency_list_dictionary(vertices, edges):
+def adjacency_list_dictionary(tasks, edges):
     adjacency_list = {}
-    for vertex in vertices:
-        adjacency_list[vertex] = []
+    for i in range(tasks):
+        adjacency_list[i+1] = []
     
     for edge in edges:
         vertex1, vertex2 = edge
@@ -31,35 +37,18 @@ def adjacency_list_dictionary(vertices, edges):
 
 def main():
     tasks, prerequisites = map(int, input().split())
-    vertices = set()
     edges = []
+
     for _ in range(prerequisites):
-        a, b = map(int, input().split())
-        vertices.add(a)
-        vertices.add(b)
-        edges.append([a, b])
+        edges.append(list(map(int, input().split())))
     
-    adjacency_list = adjacency_list_dictionary(vertices, edges)
+    adjacency_list = adjacency_list_dictionary(tasks, edges)
+    res = dfs(adjacency_list, tasks)
 
-    res = dfs(1, adjacency_list, vertices)
+    if len(res) > 0:
+        print(" ".join(str(num) for num in res))
+    else:
+        print("IMPOSSIBLE")
 
-    #print(edges)
-    #print(vertices)
-    print(adjacency_list)
-
-
-test("""5 4
-1 3
-2 3
-3 4
-2 5
-""")
-
-test("""3 3
-1 2
-2 3
-3 1
-""")
-
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
