@@ -2,6 +2,15 @@ import sys,io
 
 def test(s): sys.stdin=io.StringIO(s); main()
 
+def scc_adj_list(scc, count):
+    adj_list = {}
+    for i in range(count):
+        adj_list[i+1] = []
+    for tuple in scc:
+        index, vertex = tuple
+        adj_list[index].append(vertex)
+    return adj_list
+
 def controlled_dfs(rooms, adj_list, filter):
     neighbor_list = {}
     for i in range(len(adj_list)):
@@ -86,8 +95,11 @@ def main():
 
     scc, count = controlled_dfs(rooms, adj_list_r, result)
 
+    scc_list = scc_adj_list(scc, count)
     
     print(scc)
+    print(adj_list)
+    print(scc_list)
     
 
 test("""10 13
