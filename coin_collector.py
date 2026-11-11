@@ -1,22 +1,28 @@
 import sys,io
 
-def test(s): sys.stdin=io.StringIO(s); main()
+#def test(s): sys.stdin=io.StringIO(s); main()
 
-def scc_adj_list(scc, count):
-    adj_list = {}
-    for i in range(count):
-        adj_list[i+1] = []
-    for tuple in scc:
-        index, vertex = tuple
-        adj_list[index].append(vertex)
-    return adj_list
+def room_val_to_scc(scc, room_values, count):
+    room_values = [0] + room_values
+    scc_room_values = [0] * (count+1)
+    for i in range(len(scc)):
+        scc_room_values[scc[i]] += room_values[i]
+    return scc_room_values
+
+def scc_edge_list(scc, adj_list, count):
+    scc_edge_list = []
+    for i in range(1, len(scc)):
+        for value in adj_list[i]:
+            if scc[i] != scc[value]:
+                scc_edge_list.append([scc[i], scc[value]])
+    return scc_edge_list
 
 def controlled_dfs(rooms, adj_list, filter):
     neighbor_list = {}
     for i in range(len(adj_list)):
         neighbor_list[i+1] = adj_list[i+1].copy()
 
-    res = []
+    res = [0] * (rooms+1)
     colors = [0] * (rooms+1)
     count = 0
     for i in range(len(filter)):
@@ -30,7 +36,7 @@ def controlled_dfs(rooms, adj_list, filter):
             v, neighbors = stack.pop()
             if len(neighbors) == 0:
                 colors[v] = 2
-                res.append((count, v))
+                res[v] = count
             else:
                 u = neighbors.pop()
                 if colors[u] == 0:
@@ -47,23 +53,26 @@ def dfs(rooms, adj_list):
         neighbor_list[i+1] = adj_list[i+1].copy()
 
     colors = [0] * (rooms+1)
-    stack = [(1, neighbor_list[1])]
-    colors[1] = 1
+    
     res = []
 
-    while stack:
-        v, neighbors = stack.pop()
-        if len(neighbors) == 0:
-            colors[v] = 2
-            res.append(v)
-        else:
-            u = neighbors.pop()
-            if colors[u] == 0:
-                colors[u] = 1
-                stack.append((v, neighbors))
-                stack.append((u, neighbor_list[u]))
-            elif colors[u] == 1 or colors[u] == 2:
-                stack.append((v, neighbors))
+    for i in range(rooms):
+        if colors[i+1] != 2:
+            stack = [(i+1, neighbor_list[i+1])]
+            while stack:
+                v, neighbors = stack.pop()
+                colors[v] = 1
+                if len(neighbors) == 0:
+                    colors[v] = 2
+                    res.append(v)
+                else:
+                    u = neighbors.pop()
+                    if colors[u] == 0:
+                        colors[u] = 1
+                        stack.append((v, neighbors))
+                        stack.append((u, neighbor_list[u]))
+                    elif colors[u] == 1 or colors[u] == 2:
+                        stack.append((v, neighbors))
     return res[::-1]
 
 def adjacency_list_dictionary(rooms, edges):
@@ -90,35 +99,68 @@ def main():
     adj_list = adjacency_list_dictionary(rooms, edges)
     adj_list_r = adjacency_list_dictionary(rooms, edges_r)
 
-    #print(adj_list)
     result = dfs(rooms, adj_list)
+    
+    # print("new")
+    # print(result)
 
     scc, count = controlled_dfs(rooms, adj_list_r, result)
-
-    scc_list = scc_adj_list(scc, count)
     
-    print(scc)
-    print(adj_list)
-    print(scc_list)
+    scc_edges = scc_edge_list(scc, adj_list, count)
+    scc_adj_list = adjacency_list_dictionary(count, scc_edges)
+    scc_room_values = room_val_to_scc(scc, room_values, count)
+
+    # print(scc)
+    # print(scc_adj_list)
+    # print(scc_room_values)
+
+    scc_topo = list(dict.fromkeys(scc[1:]))
+    # print(scc_topo)
+
+    dp = [-1] * (len(scc_topo)+1)
+    for i in range(1, len(dp)):
+        dp[i] = scc_room_values[i]
+
+    for u in scc_adj_list:
+        neighbors = scc_adj_list[u]
+        for neighbor in neighbors:
+            dp[neighbor] = max(dp[neighbor], dp[u]+scc_room_values[neighbor])
+    print(max(dp))
     
+# test("""10 13
+# 3 3 4 3 3 3 3 5 6 10
+# 1 2
+# 2 3
+# 3 1
+# 1 8
+# 8 9
+# 9 8
+# 9 10
+# 1 4
+# 4 5
+# 5 10
+# 5 6
+# 6 7
+# 7 4
+# """)
 
-test("""10 13
-3 3 4 3 3 3 3 5 6 10
-1 2
-2 3
-3 1
-1 8
-8 9
-9 8
-9 10
-1 4
-4 5
-5 10
-5 6
-6 7
-7 4
-""")
+# test("""4 4
+# 4 5 2 7
+# 1 2
+# 2 1
+# 1 3
+# 2 4
+# """)
 
+# test("""3 1
+# 2 3 20
+# 1 2
+# """)
+
+# test("""1 1
+# 8
+# 1 1
+# """)
 
 # test("""4 4
 # 4 5 2 7
@@ -129,7 +171,7 @@ test("""10 13
 # """)
 
 # test("""5 5
-# 10 6 4 7
+# 10 6 4 7 5
 # 1 2
 # 1 5
 # 2 3
@@ -156,5 +198,5 @@ test("""10 13
 # 2 5
 # """)
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
