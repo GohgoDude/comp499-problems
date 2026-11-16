@@ -4,10 +4,7 @@
 def decrement(clue, y_pos, x_pos):
     for y in range(y_pos-1, y_pos+2):
         for x in range(x_pos-1, x_pos+2):
-            try:
-                clue[y][x] -= 1
-            except IndexError:
-                continue
+            clue[y][x] -= 1
     return clue
 
 def validation(clue, h, w):
