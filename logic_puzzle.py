@@ -24,17 +24,13 @@ def main():
     for j in range(h+2):
         clue[j] = list(map(int, input().split()))
 
-    board_y = -1
-    board_x = -1
     for y in range(1, h+1):
-        board_y += 1
-        board_x = -1
         for x in range(1, w+1):
-            board_x += 1
             corner = clue[y-1][x-1]
             if corner > 0:
                 clue = decrement(clue, y, x)
-                board[board_y][board_x] = 'X'
+                # y-1 and x-1 is the associated position on the board with X and .
+                board[y-1][x-1] = 'X'
 
     valid = validation(clue, h, w)
 
@@ -43,7 +39,6 @@ def main():
             print("".join(line))
     else:
         print("impossible")
-    
 
 # test("""2 3
 # 1 1 2 1 1
