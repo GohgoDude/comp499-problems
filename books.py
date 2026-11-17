@@ -9,9 +9,9 @@ def main():
     top = books[0]
     sum = books[0]
     for i in range(1, n):
+        sum += books[i]
         if books[i] > top:
             top = books[i]
-            sum += books[i]
     print(max(2*top, sum))
     
 # test("""3
