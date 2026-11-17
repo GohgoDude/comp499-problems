@@ -1,15 +1,24 @@
-#import sys,io
+# import sys,io
 
-#def test(s): sys.stdin=io.StringIO(s); main()
+# def test(s): sys.stdin=io.StringIO(s); main()
 
 def main():
     n = int(input())
     for _ in range(n):
-        a, b = map(int, input().split())
-        if ((a==(b/2)) or ((a/2)==b)) or (a==b and a%2 != 0 and a!=1):
+        a, b = map(float, input().split())
+        temp = a
+        if a < b:
+            a = b
+            b = temp
+        if (a+b) % 3 == 0 and (a-b) <= (a/2):
             print("YES")
         else:
             print("NO")
+    print()
+
+# test("""1
+# 4 5
+# """)
 
 # test("""3
 # 2 1
